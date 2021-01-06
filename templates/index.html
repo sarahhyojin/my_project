@@ -1,0 +1,103 @@
+<!Doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>TOTD</title>
+
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!--Bootstrap-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!--Googlefonts-->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap"
+          rel="stylesheet">
+    <style type="text/css">
+        * {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        .wrap {
+            width: 900px;
+            margin: auto;
+            margin-top: 30px;
+        }
+
+        div.question-box {
+            margin: 10px 0 20px 0;
+        }
+
+        .bad {
+            color: red;
+        }
+    </style>
+
+    <script>
+        function showMiseInfo() {
+            // 여기에 코드를 입력하세요
+            $('#dailyinfo').empty();
+            $.ajax({
+                    type: "GET",
+                    url: "http://openapi.seoul.go.kr:8088/6d4d776b466c656533356a4b4b5872/json/RealtimeCityAir/1/99",
+                    data: {},
+                    success: function (response) {
+                        let rows = response["RealtimeCityAir"].row;
+                        console.log(rows)
+                        let guName = rows[18]["MSRSTE_NM"];
+                        let guMise = rows[18]["PM10"];
+                        let guUltraMise = rows[18]["PM25"];
+                        // let tempHtml = '';
+                        // if (guMise > 10) {
+                        //     tempHtml = `<tr>
+                        //             <th scope="row">${guName}</th>
+                        //             <td id="weather"></td>
+                        //             <td class="bad" id="mise">${guMise}</td>
+                        //             <td id="confirmed"></td>
+                        //             </tr>`
+                        // } else {
+                        //     tempHtml = `<tr>
+                        //             <th scope="row">${guName}</th>
+                        //             <td id="weather"></td>
+                        //             <td id="mise">${guMise}</td>
+                        //             <td id="confirmed"></td>
+                        //             </tr>`
+                        // }
+
+                        $('#dailyinfo').append(tempHtml);
+                    }
+                }
+            )
+        }
+    </script>
+
+</head>
+
+<body>
+<div class="wrap">
+    <h1 style="text-align:center">API</h1>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">City</th>
+            <th scope="col">Weather</th>
+            <th scope="col">Mise</th>
+            <th scope="col">Confirmed</th>
+        </tr>
+        </thead>
+        <tbody id="dailyinfo">
+        <tr>
+            <th scope="row">Seoul</th>
+            <td id="weather">Mark</td>
+            <td id="mise">Otto</td>
+            <td id="confirmed">@mdo</td>
+        </tr>
+        </tbody>
+    </table>
+    <button onclick="showMiseInfo()">Update</button>
+</div>
+</body>
+
+</html>
