@@ -8,8 +8,8 @@
     <!-- jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <!--Bootstrap-->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
     <!--Googlefonts-->
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap"
@@ -22,11 +22,24 @@
         .wrap {
             width: 900px;
             margin: auto;
-            margin-top: 30px;
+            margin-top: 50px;
         }
 
-        div.question-box {
-            margin: 10px 0 20px 0;
+        .table {
+            text-align: center;
+        }
+
+        .TOTD {
+            width: 900px;
+            margin: auto;
+            margin-top: 50px;
+        }
+
+        .Upload {
+            width: 900px;
+            margin: auto;
+            margin-top: 30px;
+            margin-bottom: 80px;
         }
 
         .bad {
@@ -35,68 +48,176 @@
     </style>
 
     <script>
-        function showMiseInfo() {
-            // 여기에 코드를 입력하세요
-            $('#dailyinfo').empty();
+        function showDailyInfo() {
+            $.ajax({
+                type: "GET",
+                url: "/weather",
+                data: {},
+                success: function (response) {
+                    let item = response["response"].body.items.item;
+                    for (let i = 0; i < item.length; i++) {
+                        let mise = item[i];
+                        if (mise["category"] == "POP") {
+                            rain = item[i]["fcstValue"];
+                        }
+                        else if (mise["category"] == "PTY") {
+                            rain_type_raw = item[i]["fcstValue"];
+                        }
+                        else if (mise["category"] == "SKY") {
+                            sky_raw = item[i]["fcstValue"];
+                        }
+                        else if (mise["category"] == "T3H") {
+                            temperature = item[i]["fcstValue"];
+                        }
+                    }
+
+                    if (rain_type_raw == 0) {
+                        rain_type = "None"
+                    } else if (rain_type_raw == 1) {
+                        rain_type = "Rain"
+                    } else if (rain_type_raw == 2) {
+                        rain_type = "Rain/Snow"
+                    } else if (rain_type_raw == 3) {
+                        rain_type = "Rain & Snow"
+                    } else if (rain_type_raw == 4) {
+                        rain_type = "Shower"
+                    } else if (rain_type_raw == 5) {
+                        rain_type = "Raindrop"
+                    } else if (rain_type_raw == 6) {
+                        rain_type = "Sleet"
+                    } else if (rain_type_raw == 7) {
+                        rain_type = "Snow"
+                    }
+                    if (sky_raw == 1) {
+                        sky = "Clear"
+                    } else if (sky_raw == 3) {
+                        sky = "Clouds"
+                    } else if (sky_raw == 4) {
+                        sky = "Cloudy"
+                    }
+                    // console.log(rain, rain_type, sky, temperature)
+                    $("#rain").text(rain)
+                    $("#rain_type").text(rain_type)
+                    $("#sky").text(sky)
+                    $("#temperature").text(temperature)
+                }
+            })
+            $.ajax({
+                type: "GET",
+                url: "/mise",
+                data: {},
+                success: function (response) {
+                    let rows = response["RealtimeCityAir"].row;
+                    let guName = rows[18]["MSRSTE_NM"];
+                    let guMise = rows[18]["PM10"];
+                    let guUltraMise = rows[18]["PM25"];
+                    // console.log(guName, guMise, guUltraMise);
+                    if (guMise > 150) {
+                        guMise = "Very Bad"
+                    } else if (guMise > 80) {
+                        guMise = "Bad"
+                    } else if (guMise > 30) {
+                        guMise = "Normal"
+                    } else if (guMise > 0) {
+                        guMise = "Good"
+                    }
+                    if (guUltraMise > 75) {
+                        guUltraMise = "Very Bad"
+                    } else if (guUltraMise > 35) {
+                        guUltraMise = "Bad"
+                    } else if (guUltraMise > 15) {
+                        guUltraMise = "Normal"
+                    } else if (guUltraMise > 0) {
+                        guUltraMise = "Good"
+                    }
+                    // console.log(guName, guMise, guUltraMise);
+                    $("#guMise").text(guMise)
+                    $("#guUltraMise").text(guUltraMise)
+                }
+            })
             $.ajax({
                     type: "GET",
-                    url: "http://openapi.seoul.go.kr:8088/6d4d776b466c656533356a4b4b5872/json/RealtimeCityAir/1/99",
+                    url: "/corona",
                     data: {},
                     success: function (response) {
-                        let rows = response["RealtimeCityAir"].row;
-                        console.log(rows)
-                        let guName = rows[18]["MSRSTE_NM"];
-                        let guMise = rows[18]["PM10"];
-                        let guUltraMise = rows[18]["PM25"];
-                        // let tempHtml = '';
-                        // if (guMise > 10) {
-                        //     tempHtml = `<tr>
-                        //             <th scope="row">${guName}</th>
-                        //             <td id="weather"></td>
-                        //             <td class="bad" id="mise">${guMise}</td>
-                        //             <td id="confirmed"></td>
-                        //             </tr>`
-                        // } else {
-                        //     tempHtml = `<tr>
-                        //             <th scope="row">${guName}</th>
-                        //             <td id="weather"></td>
-                        //             <td id="mise">${guMise}</td>
-                        //             <td id="confirmed"></td>
-                        //             </tr>`
-                        // }
-
-                        $('#dailyinfo').append(tempHtml);
+                        let item = response["response"].body.items.item;
+                        let confirm_today = item[0]["decideCnt"];
+                        let confirm_yesterday = item[1]["decideCnt"];
+                        let confirmed = confirm_today - confirm_yesterday
+                        // console.log(confirmed);
+                        $("#confirmed").text(confirmed)
                     }
                 }
             )
         }
+
     </script>
 
 </head>
 
 <body>
 <div class="wrap">
-    <h1 style="text-align:center">API</h1>
-
-    <table class="table">
+    <h1>Daily info_</h1>
+    <p></p>
+    <table class="table table-bordered">
         <thead>
         <tr>
-            <th scope="col">City</th>
-            <th scope="col">Weather</th>
-            <th scope="col">Mise</th>
-            <th scope="col">Confirmed</th>
+            <th scope="col" style="background-color:pink">City</th>
+            <th scope="col" style="background-color:powderblue">Rain(%)</th>
+            <th scope="col" style="background-color:powderblue">Rain(type)</th>
+            <th scope="col" style="background-color:powderblue">Sky</th>
+            <th scope="col" style="background-color:powderblue">Temperature(°C)</th>
+            <th scope="col" style="background-color:darkgray">Fine particles</th>
+            <th scope="col" style="background-color:darkgray">Ultra-fine particles</th>
+            <th scope="col" style="background-color:salmon">Covid-19</th>
         </tr>
         </thead>
         <tbody id="dailyinfo">
         <tr>
-            <th scope="row">Seoul</th>
-            <td id="weather">Mark</td>
-            <td id="mise">Otto</td>
-            <td id="confirmed">@mdo</td>
+            <th scope="city">Gwanak</th>
+            <td id="rain">-</td>
+            <td id="rain_type">-</td>
+            <td id="sky">-</td>
+            <td id="temperature">-</td>
+            <td id="guMise">-</td>
+            <td id="guUltraMise">-</td>
+            <td id="confirmed">-</td>
         </tr>
         </tbody>
     </table>
-    <button onclick="showMiseInfo()">Update</button>
+    <button type="button" class="btn btn-success" onclick="showDailyInfo()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+             class="bi bi-arrow-counterclockwise" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z"/>
+            <path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/>
+        </svg>
+        Update
+    </button>
+</div>
+<div class="TOTD">
+    <h1>Tip of the day_</h1>
+    <p></p>
+    <img src="https://imagesvc.meredithcorp.io/v3/mm/image?url=https%3A%2F%2Fstatic.onecms.io%2Fwp-content%2Fuploads%2Fsites%2F6%2F2020%2F09%2F09%2FFrozen.jpg"
+         class="img-fluid" alt="sample">
+    <p></p>
+    <p></p>
+    <p></p>
+    <button type="button" class="btn btn-primary" onClick="Sharing()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-bar-up"
+             viewBox="0 0 16 16">
+            <path fill-rule="evenodd"
+                  d="M8 10a.5.5 0 0 0 .5-.5V3.707l2.146 2.147a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L7.5 3.707V9.5a.5.5 0 0 0 .5.5zm-7 2.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13a.5.5 0 0 1-.5-.5z"/>
+        </svg>
+        Share
+    </button>
+</div>
+<div class="Upload">
+    <h3>Please upload your tips for today!</h3>
+    <div class="mb-3">
+        <label for="formFile" class="form-label">Please upload only image files. Only .jpg .png and .gif files are
+            allowed.</label>
+        <input class="form-control" type="file" id="formFile">
+    </div>
 </div>
 </body>
 
