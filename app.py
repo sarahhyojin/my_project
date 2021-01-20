@@ -87,5 +87,34 @@ def post_corona():
     response_data = json.loads(json.dumps(xtree))
     return jsonify(response_data)
 
+
+@app.route('/feeling')
+def feeling():
+    temperature = int(request.args.get("temperature"))
+    rain_type = request.args.get("rain_type")
+    guMise = request.args.get("guMise")
+    guUltraMise = request.args.get("guUltraMise")
+    confirmed = request.args.get("confirmed")
+
+    if rain_type == "Rain" or rain_type == "Raindrop" or rain_type == "Shower" or rain_type == "Sleet":
+        link = "/static/rain.jpg"
+    elif rain_type == "Rain/Snow" or rain_type == "Rain & Snow" or rain_type == "Snow":
+        link = "/static/snow.gif"
+    elif temperature < 20 and guMise == "Good" or guUltraMise == "Good" and confirmed < 100:
+        link = "/static/picnic.jpg"
+    elif temperature < 30 and guMise == "Good" or guUltraMise == "Good" and confirmed < 100:
+        link = "/static/surfing.jpg"
+    elif temperature >= 30:
+        link = "/static/hot.gif"
+    elif confirmed > 300:
+        link = "/static/thumbnail.jpg"
+    elif guMise == "Very Bad" or guUltraMise == "VeryBad":
+        link = "/static/home.jpg"
+    else:
+        link = "/static/travel.jpg"
+
+    return jsonify({"link": link})
+
+
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)
